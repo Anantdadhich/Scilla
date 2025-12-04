@@ -1,19 +1,12 @@
 use {
     crate::{
-        commands::CommandExec,
-        constants::{LAMPORTS_PER_SOL, SYSTEM_INSTRUCTION_TRANSFER, SYSTEM_PROGRAM_ID},
-        context::ScillaContext,
-        error::ScillaResult,
-        prompt::prompt_data,
-        ui::show_spinner,
+        commands::CommandExec, constants::LAMPORTS_PER_SOL, context::ScillaContext,
+        error::ScillaResult, prompt::prompt_data, ui::show_spinner,
     },
     comfy_table::{Cell, Table, presets::UTF8_FULL},
     console::style,
-    solana_instruction::{AccountMeta, Instruction},
     solana_pubkey::Pubkey,
     solana_signature::Signature,
-    solana_transaction::Transaction,
-    std::str::FromStr,
 };
 
 /// Commands related to wallet or account management
@@ -60,9 +53,7 @@ impl AccountCommand {
                 show_spinner(self.description(), fetch_account_balance(ctx, &pubkey)).await?;
             }
             AccountCommand::Transfer => {
-                let recipient: Pubkey = prompt_data("Enter recipient pubkey:")?;
-                let amount: f64 = prompt_data("Enter amount (in SOL):")?;
-                show_spinner(self.description(), transfer_sol(ctx, &recipient, amount)).await?;
+                // show_spinner(self.description(), todo!()).await?;
             }
             AccountCommand::Airdrop => {
                 show_spinner(self.description(), request_sol_airdrop(ctx)).await?;
@@ -130,76 +121,6 @@ async fn fetch_account_balance(ctx: &ScillaContext, pubkey: &Pubkey) -> anyhow::
         style("Account balance in SOL:").green().bold(),
         style(format!("{:#?}", acc_balance)).cyan()
     );
-
-    Ok(())
-}
-
-async fn transfer_sol(ctx: &ScillaContext, recipient: &Pubkey, amount: f64) -> anyhow::Result<()> {
-    // Input validation
-    if amount <= 0.0 {
-        return Err(anyhow::anyhow!("Transfer amount must be greater than 0"));
-    }
-
-    // Check sender has sufficient balance
-    let sender_account = ctx.rpc().get_account(ctx.pubkey()).await?;
-    let sender_balance = lamports_to_sol(sender_account.lamports);
-
-    if amount > sender_balance {
-        return Err(anyhow::anyhow!(
-            "Insufficient balance. Have {:.6} SOL, trying to send {:.6} SOL",
-            sender_balance,
-            amount
-        ));
-    }
-
-    let lamports = (amount * (LAMPORTS_PER_SOL as f64)).round() as u64;
-    let recent_blockhash = ctx.rpc().get_latest_blockhash().await?;
-
-    let mut instruction_data = vec![SYSTEM_INSTRUCTION_TRANSFER];
-    instruction_data.extend_from_slice(&lamports.to_le_bytes());
-
-    let program_id = Pubkey::from_str(SYSTEM_PROGRAM_ID)?;
-
-    let instruction = Instruction {
-        program_id,
-        accounts: vec![
-            AccountMeta::new(*ctx.pubkey(), true),
-            AccountMeta::new(*recipient, false),
-        ],
-        data: instruction_data,
-    };
-
-    let transaction = Transaction::new_signed_with_payer(
-        &[instruction],
-        Some(ctx.pubkey()),
-        &[ctx.keypair()],
-        recent_blockhash,
-    );
-
-    let signature = ctx.rpc().send_and_confirm_transaction(&transaction).await?;
-
-    let mut table = Table::new();
-    table
-        .load_preset(UTF8_FULL)
-        .set_header(vec![
-            Cell::new("Field").add_attribute(comfy_table::Attribute::Bold),
-            Cell::new("Value").add_attribute(comfy_table::Attribute::Bold),
-        ])
-        .add_row(vec![
-            Cell::new("Recipient"),
-            Cell::new(recipient.to_string()),
-        ])
-        .add_row(vec![
-            Cell::new("Amount (SOL)"),
-            Cell::new(format!("{:.6}", amount)),
-        ])
-        .add_row(vec![
-            Cell::new("Signature"),
-            Cell::new(signature.to_string()),
-        ]);
-
-    println!("\n{}", style("TRANSFER SUCCESSFUL").green().bold());
-    println!("{}", table);
 
     Ok(())
 }
