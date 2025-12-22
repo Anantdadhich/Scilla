@@ -35,10 +35,10 @@ impl ConfigCommand {
 impl fmt::Display for ConfigCommand {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         let command = match self {
-            ConfigCommand::Show => "Show ScillaConfig",
+            ConfigCommand::Show => "View ScillaConfig",
             ConfigCommand::Generate => "Generate ScillaConfig",
             ConfigCommand::Edit => "Edit ScillaConfig",
-            ConfigCommand::GoBack => "Go Back",
+            ConfigCommand::GoBack => "Go back",
         };
         write!(f, "{}", command)
     }
