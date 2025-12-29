@@ -283,20 +283,18 @@ async fn transfer_sol(
     amount: SolAmount,
 ) -> anyhow::Result<()> {
     let lamports = amount.to_lamports();
+    let fee = 5000_u64; // Base transaction fee (5000 lamports per signature)
 
-  
     let sender_balance = ctx.rpc().get_balance(ctx.pubkey()).await?;
-    if sender_balance < lamports {
+    if sender_balance < lamports + fee {
         bail!(
-            "Insufficient balance. You have {} SOL but tried to send {} SOL",
-            lamports_to_sol(sender_balance),
-            amount.value()
+            "Insufficient balance. Need {} SOL (amount + fee), have {} SOL",
+            lamports_to_sol(lamports + fee),
+            lamports_to_sol(sender_balance)
         );
     }
 
-   
     let transfer_ix = system_instruction::transfer(ctx.pubkey(), recipient, lamports);
-
 
     let signature = build_and_send_tx(ctx, &[transfer_ix], &[ctx.keypair()]).await?;
 
