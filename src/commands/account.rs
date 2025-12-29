@@ -3,14 +3,15 @@ use {
         commands::CommandExec,
         context::ScillaContext,
         error::ScillaResult,
-        misc::helpers::{bincode_deserialize, lamports_to_sol},
+        misc::helpers::{bincode_deserialize, build_and_send_tx, lamports_to_sol, SolAmount},
         prompt::prompt_data,
         ui::{print_error, show_spinner},
     },
     anyhow::bail,
     comfy_table::{Cell, Table, presets::UTF8_FULL},
     console::style,
-    inquire::Select,
+    inquire::{Confirm, Select},
+    solana_system_interface::instruction as system_instruction,
     solana_nonce::versions::Versions,
     solana_pubkey::Pubkey,
     solana_rpc_client_api::config::{RpcLargestAccountsConfig, RpcLargestAccountsFilter},
@@ -70,7 +71,28 @@ impl AccountCommand {
                 show_spinner(self.spinner_msg(), fetch_account_balance(ctx, &pubkey)).await?;
             }
             AccountCommand::Transfer => {
-                // show_spinner(self.spinner_msg(), todo!()).await?;
+                let recipient: Pubkey = prompt_data("Enter recipient address:")?;
+                let amount: SolAmount = prompt_data("Enter amount to transfer (SOL):")?;
+
+              
+                let confirm = Confirm::new(&format!(
+                    "Transfer {} SOL to {}?",
+                    amount.value(),
+                    recipient
+                ))
+                .with_default(false)
+                .prompt()?;
+
+                if !confirm {
+                    println!("{}", style("Transfer cancelled.").yellow());
+                    return Ok(CommandExec::Process(()));
+                }
+
+                show_spinner(
+                    self.spinner_msg(),
+                    transfer_sol(ctx, &recipient, amount),
+                )
+                .await?;
             }
             AccountCommand::Airdrop => {
                 show_spinner(self.spinner_msg(), request_sol_airdrop(ctx)).await?;
@@ -251,6 +273,39 @@ async fn fetch_nonce_account(ctx: &ScillaContext, pubkey: &Pubkey) -> anyhow::Re
 
     println!("\n{}", style("NONCE ACCOUNT INFO").green().bold());
     println!("{table}");
+
+    Ok(())
+}
+
+async fn transfer_sol(
+    ctx: &ScillaContext,
+    recipient: &Pubkey,
+    amount: SolAmount,
+) -> anyhow::Result<()> {
+    let lamports = amount.to_lamports();
+
+  
+    let sender_balance = ctx.rpc().get_balance(ctx.pubkey()).await?;
+    if sender_balance < lamports {
+        bail!(
+            "Insufficient balance. You have {} SOL but tried to send {} SOL",
+            lamports_to_sol(sender_balance),
+            amount.value()
+        );
+    }
+
+   
+    let transfer_ix = system_instruction::transfer(ctx.pubkey(), recipient, lamports);
+
+
+    let signature = build_and_send_tx(ctx, &[transfer_ix], &[ctx.keypair()]).await?;
+
+    println!(
+        "{}\n{}\n{}",
+        style("Transfer successful!").green().bold(),
+        style(format!("Sent {} SOL to {}", amount.value(), recipient)).cyan(),
+        style(format!("Transaction signature: {}", signature)).dim()
+    );
 
     Ok(())
 }

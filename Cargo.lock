@@ -1975,6 +1975,7 @@ dependencies = [
  "solana-sdk-ids",
  "solana-signature",
  "solana-stake-interface",
+ "solana-system-interface",
  "solana-transaction",
  "solana-transaction-status",
  "solana-vote-interface",
