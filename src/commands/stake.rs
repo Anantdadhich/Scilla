@@ -88,7 +88,7 @@ impl StakeCommand {
         match self {
             StakeCommand::Create => {
                 let stake_account_keypair_path: PathBuf =
-                    prompt_data("Enter Stake Account Keypair: ")?;
+                    prompt_data("Enter Stake Account Keypair Path: ")?;
                 let amount_sol: SolAmount = prompt_data("Enter amount to stake (in SOL):")?;
                 let withdraw_authority_keypair_path: PathBuf =
                     prompt_data("Enter Withdraw Authority Keypair Path: ")?;
