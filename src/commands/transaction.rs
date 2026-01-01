@@ -119,8 +119,12 @@ async fn process_check_confirmation(
     table
         .load_preset(UTF8_FULL)
         .set_header(vec![
-            Cell::new("Field").add_attribute(comfy_table::Attribute::Bold),
-            Cell::new("Value").add_attribute(comfy_table::Attribute::Bold),
+            Cell::new("Field")
+                .add_attribute(comfy_table::Attribute::Bold)
+                .fg(comfy_table::Color::Cyan),
+            Cell::new("Value")
+                .add_attribute(comfy_table::Attribute::Bold)
+                .fg(comfy_table::Color::Cyan),
         ])
         .add_row(vec![Cell::new("Signature"), Cell::new(signature)])
         .add_row(vec![Cell::new("Status"), Cell::new(status_styled)]);
@@ -145,8 +149,12 @@ async fn process_fetch_transaction_status(
     table
         .load_preset(UTF8_FULL)
         .set_header(vec![
-            Cell::new("Field").add_attribute(comfy_table::Attribute::Bold),
-            Cell::new("Value").add_attribute(comfy_table::Attribute::Bold),
+            Cell::new("Field")
+                .add_attribute(comfy_table::Attribute::Bold)
+                .fg(comfy_table::Color::Cyan),
+            Cell::new("Value")
+                .add_attribute(comfy_table::Attribute::Bold)
+                .fg(comfy_table::Color::Cyan),
         ])
         .add_row(vec![Cell::new("Signature"), Cell::new(signature)])
         .add_row(vec![Cell::new("Slot"), Cell::new(tx_status.slot)])
@@ -187,8 +195,12 @@ async fn process_fetch_transaction(
     table
         .load_preset(UTF8_FULL)
         .set_header(vec![
-            Cell::new("Field").add_attribute(comfy_table::Attribute::Bold),
-            Cell::new("Value").add_attribute(comfy_table::Attribute::Bold),
+            Cell::new("Field")
+                .add_attribute(comfy_table::Attribute::Bold)
+                .fg(comfy_table::Color::Cyan),
+            Cell::new("Value")
+                .add_attribute(comfy_table::Attribute::Bold)
+                .fg(comfy_table::Color::Cyan),
         ])
         .add_row(vec![Cell::new("Signature"), Cell::new(signature)])
         .add_row(vec![Cell::new("Slot"), Cell::new(tx.slot)]);
@@ -224,8 +236,12 @@ async fn process_fetch_transaction(
             msg_table
                 .load_preset(UTF8_FULL)
                 .set_header(vec![
-                    Cell::new("Field").add_attribute(comfy_table::Attribute::Bold),
-                    Cell::new("Value").add_attribute(comfy_table::Attribute::Bold),
+                    Cell::new("Field")
+                        .add_attribute(comfy_table::Attribute::Bold)
+                        .fg(comfy_table::Color::Cyan),
+                    Cell::new("Value")
+                        .add_attribute(comfy_table::Attribute::Bold)
+                        .fg(comfy_table::Color::Cyan),
                 ])
                 .add_row(vec![
                     Cell::new("Account Keys"),
@@ -266,8 +282,12 @@ async fn process_fetch_transaction(
             msg_table
                 .load_preset(UTF8_FULL)
                 .set_header(vec![
-                    Cell::new("Field").add_attribute(comfy_table::Attribute::Bold),
-                    Cell::new("Value").add_attribute(comfy_table::Attribute::Bold),
+                    Cell::new("Field")
+                        .add_attribute(comfy_table::Attribute::Bold)
+                        .fg(comfy_table::Color::Cyan),
+                    Cell::new("Value")
+                        .add_attribute(comfy_table::Attribute::Bold)
+                        .fg(comfy_table::Color::Cyan),
                 ])
                 .add_row(vec![
                     Cell::new("Account Keys"),
